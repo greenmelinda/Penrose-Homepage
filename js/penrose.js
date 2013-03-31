@@ -41,9 +41,6 @@ function init() {
 	var loader = new THREE.OBJLoader();
 	loader.addEventListener( 'load', function ( event ) {
 		bodyGeometry = event.content;
-		var scale = 0.025;
-		bodyGeometry.scale.set(scale, scale, scale);
-		bodyGeometry.position.y = -2.2;
 	});
 	
     loader.load( "resources/obj/penrose-body.obj" );
@@ -70,22 +67,22 @@ function render() {
 	var time = new Date().getTime() / 1000;
 	var scene = new THREE.Scene();
 	
-	
-//	var shape = THREE.SceneUtils.createMultiMaterialObject( bodyGeometry, materials );
-//	shape.overdraw = true;
-	scene.add(bodyGeometry.clone());
-	
-	// sphere
-//	var sphere = new THREE.Mesh(new THREE.CubeGeometry(200, 200, 200), new THREE.MeshLambertMaterial({color: 0x0000ff}));
-	//sphere.overdraw = true;
-	//scene.add(sphere);
-	
+	if (bodyGeometry !== undefined)
+	var geometry = bodyGeometry.clone();
+	geometry.applyMatrix(new THREE.Matrix4().identity().rotateY(0.1 * time));
+	var scale = 0.025;
+	geometry.scale.set(scale, scale, scale);
+	geometry.position.y = -2.2;
+	scene.add(geometry);
+
 	// add subtle ambient lighting
-	var ambientLight = new THREE.AmbientLight(0x555555);
+	var ambientLight = new THREE.AmbientLight(0x222222);
 	scene.add(ambientLight);
 	
 	// add directional light source
 	var directionalLight = new THREE.DirectionalLight(0xffffff);
+//	directionalLight.matrix = THREE.Matrix4.getInverse(camera.matrixWorld);
+//	directionalLight.position.set(1, 1, 1).normalize();
 	directionalLight.position.set(1, 1, 1).normalize();
 	scene.add(directionalLight);
 
