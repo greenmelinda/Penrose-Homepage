@@ -1,4 +1,4 @@
-var renderer, camera, settings, materials, objGeometry;
+var renderer, camera, settings, materials, bodyGeometry;
 
 init();
 animate();
@@ -38,9 +38,8 @@ function init() {
 	];
 	
 	
-	objGeometry = [];
-	//new FOUR.ObjGeometry('sheep.obj', 1);
-
+	bodyGeometry = new THREE.ObjGeometry( "resources/obj/penrose-body.obj", 1 );
+	
 	settings = new Settings();	
 }
 
@@ -63,50 +62,9 @@ function render() {
 	var time = new Date().getTime() / 1000;
 	var scene = new THREE.Scene();
 	
-	var modelName = settings.modelListSelect.value;
-	var fourGeometry = null;
-	
-	if (modelName == "tesseract") {
-		fourGeometry = new FOUR.TesseractGeometry( 1, 1, 1, 1, 8, 8, 8, 8 )
-	}
-	
-	if (modelName == "clifford torus") {
-		fourGeometry = new FOUR.CliffordTorusGeometry( 1, 1, 1, 1, 64, 64, 64, 64 );
-	}
-	
-	if (modelName.match(/\.obj/i)) {
-		if (objGeometry[modelName] === undefined)
-			objGeometry[modelName] = new FOUR.ObjGeometry(modelName, 1);
-		
-		fourGeometry = objGeometry[modelName].clone();
-	}
-	
-	if (fourGeometry == null) {
-		console.warn( "No geometry selected" );
-		return;
-	}
-	
-	var translate = new FOUR.Matrix5().makeTranslation(0, 0, 0, 0);
-	
-	var trans = new FOUR.Matrix5().makeRotationWX(time * 0.03);
-	var trans2 = new FOUR.Matrix5().makeRotationWY(time * 0.2);
-	var trans3 = new FOUR.Matrix5().makeRotationZW(time * 0.02);
-	trans = trans2.multiply(trans).multiply(translate);
-	
-//	var persp = 
-	
-	fourGeometry.applyMatrix(trans);
-	
-
-	
-	var shape = THREE.SceneUtils.createMultiMaterialObject( fourGeometry.asThreeGeometry(settings.isStereographicCheckbox.checked, settings.isInvertingCheckbox.checked), materials );
+//	var shape = THREE.SceneUtils.createMultiMaterialObject( bodyGeometry, materials );
 //	shape.overdraw = true;
-	scene.add(shape);
-	
-	// sphere
-	var sphere = new THREE.Mesh(new THREE.CubeGeometry(200, 200, 200), new THREE.MeshLambertMaterial({color: 0x0000ff}));
-	//sphere.overdraw = true;
-	//scene.add(sphere);
+	scene.add(bodyGeometry);
 	
 	// add subtle ambient lighting
 	var ambientLight = new THREE.AmbientLight(0x555555);

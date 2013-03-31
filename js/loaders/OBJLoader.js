@@ -120,15 +120,15 @@ THREE.OBJLoader.prototype = {
 
 		// v float float float
 
-		var vertex_pattern = /v( +[\d|\.|\+|\-|e]+)( [\d|\.|\+|\-|e]+)( [\d|\.|\+|\-|e]+)/;
+		var vertex_pattern = /v( +[\d|\.|\+|\-|eE]+)( [\d|\.|\+|\-|eE]+)( [\d|\.|\+|\-|eE]+)/;
 
 		// vn float float float
 
-		var normal_pattern = /vn( +[\d|\.|\+|\-|e]+)( [\d|\.|\+|\-|e]+)( [\d|\.|\+|\-|e]+)/;
+		var normal_pattern = /vn( +[\d|\.|\+|\-|eE]+)( [\d|\.|\+|\-|eE]+)( [\d|\.|\+|\-|eE]+)/;
 
 		// vt float float
 
-		var uv_pattern = /vt( +[\d|\.|\+|\-|e]+)( [\d|\.|\+|\-|e]+)/;
+		var uv_pattern = /vt( +[\d|\.|\+|\-|Ee]+)( [\d|\.|\+|\-|Ee]+)/;
 
 		// f vertex vertex vertex ...
 
