@@ -8,8 +8,8 @@ function init() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 	
-	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-	camera.position.z = 7;
+	camera = new THREE.PerspectiveCamera(5, window.innerWidth / window.innerHeight, 1, 1000);
+	camera.position.z = 70;
 	
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	controls.addEventListener( 'change', render );
@@ -17,9 +17,8 @@ function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 
 	var Settings = function () {
-		this.modelListSelect = document.getElementById("modelList");
-		this.isStereographicCheckbox = document.getElementById("isStereographic");
-		this.isInvertingCheckbox = document.getElementById("isInverting");
+		this.isRotatingCheckbox = document.getElementById("isRotating");
+		this.isAnimatingCheckbox = document.getElementById("isAnimating");
 	};
 	
 	materials = [
@@ -70,8 +69,17 @@ function animate() {
 	//stats.update();
 }
 
+var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 function render() {
 	var time = new Date().getTime() / 1000;
+	if (settings.isAnimatingCheckbox.checked) 
+		lastAnimation += time - lastTime;
+
+	if (settings.isRotatingCheckbox.checked) 
+		lastRotation += time - lastTime;
+
+	lastTime = time;
+	
 	var scene = new THREE.Scene();
 	var triangle = new THREE.Object3D();
 	
@@ -101,9 +109,11 @@ function render() {
 					var speed = 1000;
 					var amplitude = 0.4;
 					var gain = 0.6;
-					var r = Math.cos((p.x * scale) * time * speed ) * amplitude + gain;
-					var g = Math.cos((p.y * scale) * time * speed ) * amplitude + gain;
-					var b = Math.cos((p.z * scale) * time * speed ) * amplitude + gain;
+					
+					var t = lastAnimation * speed;
+					var r = Math.sin((p.x * scale) * t ) * amplitude + gain;
+					var g = Math.sin((p.y * scale) * t ) * amplitude + gain;
+					var b = Math.sin((p.z * scale) * t ) * amplitude + gain;
 					
 					color.setRGB(r, g, b);
 					f.vertexColors[ j ] = color;
@@ -123,10 +133,21 @@ function render() {
 		triangle.add(geometry);
 	}
 	
-	triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.1 * time));
+
+	var mesh = new THREE.Mesh( 
+		new THREE.CircleGeometry(200, 36),
+		new THREE.MeshBasicMaterial( { color: 0x111111, shading: THREE.FlatShading } ) 
+	);
+	
+	mesh.applyMatrix(new THREE.Matrix4().identity().rotateX(-Math.PI / 2));
+	mesh.position.y = -0.6;
+	triangle.add(mesh);
+	
+	triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.1 * lastRotation));
+		
 	var scale = 0.025;
 	triangle.scale.set(scale, scale, scale);
-	triangle.position.y = -2.2;
+	triangle.position.y = -2.5;
 	scene.add(triangle);
 
 	// add subtle ambient lighting
@@ -136,7 +157,7 @@ function render() {
 	scene.fog = new THREE.Fog( 0x111111, 1500, 2100 );
 
 	// add directional light source
-	var directionalLight = new THREE.DirectionalLight(0x111111);
+	var directionalLight = new THREE.DirectionalLight(0x222222);
 //	directionalLight.matrix = THREE.Matrix4.getInverse(camera.matrixWorld);
 //	directionalLight.position.set(1, 1, 1).normalize();
 	directionalLight.position.set(1, 1, 1).normalize();
