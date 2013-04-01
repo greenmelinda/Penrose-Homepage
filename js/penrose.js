@@ -105,15 +105,15 @@ function render() {
 
 					color = new THREE.Color( 0xffffff );
 					
-					var scale = 0.0001;
-					var speed = 1000;
+					var scale = 1;
+					var speed = 4;
 					var amplitude = 0.4;
 					var gain = 0.6;
 					
 					var t = lastAnimation * speed;
-					var r = Math.sin((p.x * scale) * t ) * amplitude + gain;
-					var g = Math.sin((p.y * scale) * t ) * amplitude + gain;
-					var b = Math.sin((p.z * scale) * t ) * amplitude + gain;
+					var r = Math.sin((p.x * scale) + t * speed) * amplitude + gain;
+					var g = Math.sin((p.y * scale) + t * speed ) * amplitude + gain;
+					var b = Math.sin((p.z * scale) + t * speed ) * amplitude + gain;
 					
 					color.setRGB(r, g, b);
 					f.vertexColors[ j ] = color;
