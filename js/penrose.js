@@ -101,7 +101,7 @@ function render() {
 				for( var j = 0; j < n; j++ ) {
 					vertexIndex = f[ faceIndices[ j ] ];
 
-					p = geometry.vertices[ vertexIndex ];
+					p = geometry.vertices[vertexIndex].clone();
 
 					color = new THREE.Color( 0xffffff );
 					
@@ -109,11 +109,12 @@ function render() {
 					var speed = 4;
 					var amplitude = 0.4;
 					var gain = 0.6;
+					p = p.multiplyScalar(scale)
+					p = p.addScalar((lastAnimation  * speed) % Math.PI);
 					
-					var t = lastAnimation * speed;
-					var r = Math.sin((p.x * scale) + t * speed) * amplitude + gain;
-					var g = Math.sin((p.y * scale) + t * speed ) * amplitude + gain;
-					var b = Math.sin((p.z * scale) + t * speed ) * amplitude + gain;
+					var r = Math.sin(p.x) * Math.cos(p.y) * amplitude + gain;
+					var g = Math.sin(p.y) * Math.cos(p.z) * amplitude + gain;
+					var b = Math.sin(p.z) * Math.cos(p.x) * amplitude + gain;
 					
 					color.setRGB(r, g, b);
 					f.vertexColors[ j ] = color;
