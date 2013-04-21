@@ -15,11 +15,12 @@ p {
 }
 
 a {
-    color: #ddd;
+    color: #bbb;
 }
 
 a:link {
-    color: #ddd;
+    color: #bbb;
+    text-decoration:  none;
 } 
 
 a:visited {
@@ -28,6 +29,10 @@ a:visited {
 
 a:hover {
     color: #fff;
+}
+
+img.logo {
+    vertical-align:text-top;
 }
 
 #panel {
@@ -39,7 +44,7 @@ a:hover {
 }
 
 #panelInside {
-	text-align: center;
+    text-align: left;
 }
 
 #container {
@@ -52,7 +57,6 @@ a:hover {
 
 #text {
   font-size: 24pt;
-  text-align: center;
   margin-top: 140px;
 }
 

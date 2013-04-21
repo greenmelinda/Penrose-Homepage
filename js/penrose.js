@@ -155,7 +155,7 @@ function render() {
 	var ambientLight = new THREE.AmbientLight(0x222222);
 	scene.add(ambientLight);
 	
-	scene.fog = new THREE.Fog( 0x111111, 1500, 2100 );
+    scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
 
 	// add directional light source
 	var directionalLight = new THREE.DirectionalLight(0x222222);
