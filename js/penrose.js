@@ -3,8 +3,14 @@ var renderer, camera, settings, materials, bodyGeometry, lightGeometry;
 init();
 animate();
 
+document.onselectstart = function() {
+  return false;
+};
+
 function init() {
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({
+		antialias: true,
+	});
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 	
@@ -100,23 +106,10 @@ function render() {
 
 				for( var j = 0; j < n; j++ ) {
 					vertexIndex = f[ faceIndices[ j ] ];
-
-					p = geometry.vertices[vertexIndex].clone();
-
-					color = new THREE.Color( 0xffffff );
-					
-					var scale = 1;
-					var speed = 4;
-					var amplitude = 0.4;
-					var gain = 0.6;
-					p = p.multiplyScalar(scale)
-					p = p.addScalar((lastAnimation  * speed) % Math.PI);
-					
-					var r = Math.sin(p.x) * Math.cos(p.y) * amplitude + gain;
-					var g = Math.sin(p.y) * Math.cos(p.z) * amplitude + gain;
-					var b = Math.sin(p.z) * Math.cos(p.x) * amplitude + gain;
-					
-					color.setRGB(r, g, b);
+	
+					var h = ((lastAnimation * 5) % 100) / 100.0;
+					var color = new THREE.Color();
+					color = color.setHSL(h, 1.0, 0.5);
 					f.vertexColors[ j ] = color;
 				}
 			}
@@ -158,7 +151,7 @@ function render() {
     scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
 
 	// add directional light source
-	var directionalLight = new THREE.DirectionalLight(0x222222);
+	var directionalLight = new THREE.DirectionalLight(0x404040);
 //	directionalLight.matrix = THREE.Matrix4.getInverse(camera.matrixWorld);
 //	directionalLight.position.set(1, 1, 1).normalize();
 	directionalLight.position.set(1, 1, 1).normalize();

@@ -5,39 +5,44 @@
     <meta charset="utf-8">
     <title>The Penrose Triangle</title>
     <link rel="stylesheet" href="penrose.css" />
+
   </head>
   <body>
+
     <div id="panel">
-        <div id="panelInside">
-            <a href="wordpress/">
-                <h1>
-                    <img class=logo src="resources/Penrose Triangle Logo Text.png" />
-                </h1>
+        <a href="http://penrosetriangle.com/wordpress/">
+            <h1>
+                <img class=logo src="resources/Penrose Triangle Logo Text.png" />
+            </h1>
+        </a>
 
-                <h3>
-                    More...
-                </h3>
-            </a>
-
-            <label>
-                <input type='checkbox' id='isRotating' checked='yes' />
-                Rotating
-            </label>
-            <br />
-            <label>
-                <input type='checkbox' id='isAnimating' checked='yes' />
-                Animating
-            </label>
-            </p>
-
-	</div>
+        <div id="menu">
+            <ul>
+                <li><a href="http://penrosetriangle.com/wordpress">News</a></li>
+                <li><a href="http://penrosetriangle.com/wordpress/?page_id=4">About</a></li>
+                <li><a href="http://penrosetriangle.com/wordpress/?page_id=27">Team</a></li>
+                <li><a href="http://penrosetriangle.com/wordpress/?page_id=2">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <label>
+            <input type='checkbox' id='isRotating' checked='yes' />
+            Rotating
+        </label>
+        <br />
+        <label>
+            <input type='checkbox' id='isAnimating' checked='yes' />
+            Animating
+        </label>
     </div>
 
+    <script src="js/color.min.js"></script> 
     <script src="js/three.js"></script> 
     <script src="js/controls/OrbitControls.js"></script>
     <script src="js/loaders/OBJLoader.js"></script>
-
-    <script src="js/libs/stats.min.js"></script>
+    <!--<script src="js/libs/stats.min.js"></script>-->
     <script src="js/penrose.js"></script>
 
   </body>
