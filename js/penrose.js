@@ -1,5 +1,6 @@
 
 var renderer, camera, settings, materials, bodyGeometry, lightGeometry, triangle, scene;
+var modelLoaded = false;
 
 init();
 animate();
@@ -15,8 +16,9 @@ function init() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 	
-	camera = new THREE.PerspectiveCamera(5, window.innerWidth / window.innerHeight, 1, 1000);
+	camera = new THREE.PerspectiveCamera(5, window.innerWidth / window.innerHeight, 1, 900);
 	camera.position.z = 70;
+	camera.position.x = 50;
 	
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	controls.addEventListener( 'change', render );
@@ -62,7 +64,7 @@ function init() {
 		bodyGeometry = event.content.clone();			
 		triangle.add(bodyGeometry);
 		if (lightsLoaded)
-			scene.add(triangle);
+			finishModelLoad();
 		else
 			bodyLoaded = true;
 	});
@@ -74,7 +76,7 @@ function init() {
 		lightGeometry = event.content.clone();
 		triangle.add(lightGeometry);
 		if (bodyLoaded)
-			scene.add(triangle);
+			finishModelLoad();
 		else
 			lightsLoaded = true;
 	});
@@ -100,6 +102,11 @@ function init() {
 
 }
 
+function finishModelLoad() {
+	scene.add(triangle);
+	modelLoaded = true;
+}
+
 function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
@@ -107,24 +114,43 @@ function onWindowResize() {
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
+var FPS = 30.0;
+var msPerTick = 1000 / FPS;
+var nextTick = Date.now();
+
 function animate() {
+	var currentTime, ticks = 0;
+
 	requestAnimationFrame( animate, renderer.domElement );
 
-	render();
+    currentTime = Date.now();
+    if (currentTime - nextTick > 60 * msPerTick) {
+      	nextTick = currentTime - msPerTick;
+    }
+    while (currentTime > nextTick) {
+      	updateModel(scene);
+      	nextTick += msPerTick;
+      	ticks++;
+    }
+    if (ticks) {
+      	render();
+    }
+
 	controls.update();
-	//stats.update();
 }
 
-var lastTime = 0, lastAnimation = 0, lastRotation = 0;
-function render() {
-	var time = new Date().getTime() / 1000;
-	delta = time - lastTime;
-	lastTime = time;
+var hue = 0;
 
-	if (settings.isRotatingCheckbox.checked && !isNaN(delta))
+function updateModel() 
+{
+	if (!modelLoaded) 
 	{
-		console.log(lastRotation);
-		triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.13 * delta));
+		return;
+	}
+
+	if (settings.isRotatingCheckbox.checked)
+	{
+		triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.0051));
 	}
 
 	var scale = 0.025;
@@ -134,7 +160,7 @@ function render() {
 	if (settings.isAnimatingCheckbox.checked && lightGeometry !== undefined)
 	{
 		var faceIndices = [ 'a', 'b', 'c', 'd' ];
-		var f, h, n;
+		var f, n;
 		var color = new THREE.Color(0xffffff);
 		lightGeometry.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh ) {
@@ -145,8 +171,8 @@ function render() {
 					n = ( f instanceof THREE.Face3 ) ? 3 : 4;
 
 					for( var j = 0; j < n; j++ ) {	
-						h = ((time * 5) % 100) / 100.0;
-						color.setHSL(h, 1.0, 0.5);
+						hue = (hue + 0.0000001) % 1.0;
+						color.setHSL(hue, 1.0, 0.5);
 						f.vertexColors[ j ] = color;
 					}
 				}
@@ -156,7 +182,10 @@ function render() {
 			}
 		});
 	}
+}
 
+function render() 
+{
 	renderer.render( scene, camera );
 }
 
