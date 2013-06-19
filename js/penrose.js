@@ -1,6 +1,7 @@
 
-var renderer, camera, settings, materials, bodyGeometry, lightGeometry, triangle, scene;
+var renderer, camera, settings, bodyGeometry, lightGeometry, triangle, scene;
 var modelLoaded = false;
+var lightHue = 0;
 
 init();
 animate();
@@ -29,21 +30,6 @@ function init() {
 		this.isRotatingCheckbox = document.getElementById("isRotating");
 		this.isAnimatingCheckbox = document.getElementById("isAnimating");
 	};
-	
-	materials = [
-		new THREE.MeshLambertMaterial( { 
-			color: 0x222222, 
-			side: THREE.DoubleSide,
-			shading: THREE.FlatShading, 
-			transparent: true,  
-			opacity: 0.5
-		} ),
-		new THREE.MeshBasicMaterial( { 
-			color: 0xEEEEEE, 
-			shading: THREE.FlatShading, 
-			wireframe: true
-		} )
-	];
 	
 	triangle = new THREE.Object3D();
 
@@ -95,14 +81,18 @@ function init() {
 
 	// add directional light source
 	var directionalLight = new THREE.DirectionalLight(0x404040);
-	// directionalLight.matrix = THREE.Matrix4.getInverse(camera.matrixWorld);
-	// directionalLight.position.set(1, 1, 1).normalize();
 	directionalLight.position.set(1, 1, 1).normalize();
 	scene.add(directionalLight);
 
 }
 
 function finishModelLoad() {
+	lightGeometry.traverse( function ( child ) {
+		if ( child instanceof THREE.Mesh ) {			
+			child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
+		}
+	});
+
 	scene.add(triangle);
 	modelLoaded = true;
 }
@@ -128,7 +118,7 @@ function animate() {
       	nextTick = currentTime - msPerTick;
     }
     while (currentTime > nextTick) {
-      	updateModel(scene);
+      	updateModel();
       	nextTick += msPerTick;
       	ticks++;
     }
@@ -139,53 +129,33 @@ function animate() {
 	controls.update();
 }
 
-var hue = 0;
-
-function updateModel() 
-{
-	if (!modelLoaded) 
-	{
+function updateModel() {
+	if (!modelLoaded) {
 		return;
 	}
 
-	if (settings.isRotatingCheckbox.checked)
-	{
-		triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.0051));
+	if (settings.isRotatingCheckbox.checked) {
+		triangle.rotation.y += 0.0051;
 	}
 
 	var scale = 0.025;
 	triangle.scale.set(scale, scale, scale);
 	triangle.position.y = -2.5;
-	
-	if (settings.isAnimatingCheckbox.checked && lightGeometry !== undefined)
-	{
-		var faceIndices = [ 'a', 'b', 'c', 'd' ];
-		var f, n;
-		var color = new THREE.Color(0xffffff);
-		lightGeometry.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				geometry  = child.geometry;
 
-				for ( var i = 0; i < geometry.faces.length; i ++ ) {
-					f  = geometry.faces[ i ];
-					n = ( f instanceof THREE.Face3 ) ? 3 : 4;
-
-					for( var j = 0; j < n; j++ ) {	
-						hue = (hue + 0.0000001) % 1.0;
-						color.setHSL(hue, 1.0, 0.5);
-						f.vertexColors[ j ] = color;
-					}
-				}
-				
-				geometry.colorsNeedUpdate = true;
-				child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
-			}
-		});
+	if (settings.isAnimatingCheckbox.checked) {
+		lightHue = (lightHue + 0.001) % 1.0;
 	}
 }
 
-function render() 
-{
+function render() {
+	if (settings.isAnimatingCheckbox.checked && modelLoaded) {
+		lightGeometry.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				child.material.color.setHSL(lightHue, 1.0, 0.5);
+			}
+		});
+	}
+
 	renderer.render( scene, camera );
 }
 
