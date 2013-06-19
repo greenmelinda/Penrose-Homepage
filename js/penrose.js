@@ -1,4 +1,5 @@
-var renderer, camera, settings, materials, bodyGeometry, lightGeometry;
+
+var renderer, camera, settings, materials, bodyGeometry, lightGeometry, triangle, scene;
 
 init();
 animate();
@@ -42,22 +43,61 @@ function init() {
 		} )
 	];
 	
-	
+	triangle = new THREE.Object3D();
+
+	var base = new THREE.Mesh( 
+		new THREE.CircleGeometry(200, 36),
+		new THREE.MeshBasicMaterial( { color: 0x111111, shading: THREE.FlatShading } ) 
+	);
+		
+	base.applyMatrix(new THREE.Matrix4().identity().rotateX(-Math.PI / 2));
+	base.position.y = -0.6;
+	triangle.add(base);
+
 	var loader = new THREE.OBJLoader();
+	var bodyLoaded = false;
+	var lightsLoaded = false;
+
 	loader.addEventListener( 'load', function ( event ) {
-		bodyGeometry = event.content;
+		bodyGeometry = event.content.clone();			
+		triangle.add(bodyGeometry);
+		if (lightsLoaded)
+			scene.add(triangle);
+		else
+			bodyLoaded = true;
 	});
 	
     loader.load( "resources/obj/penrose-body.obj" );
 	
 	var lightLoader = new THREE.OBJLoader();
 	lightLoader.addEventListener( 'load', function ( event ) {
-		lightGeometry = event.content;
+		lightGeometry = event.content.clone();
+		triangle.add(lightGeometry);
+		if (bodyLoaded)
+			scene.add(triangle);
+		else
+			lightsLoaded = true;
 	});
 	
     lightLoader.load( "resources/obj/penrose-lights.obj" );
 	
 	settings = new Settings();	
+
+	scene = new THREE.Scene();
+
+	// add subtle ambient lighting
+	var ambientLight = new THREE.AmbientLight(0x222222);
+	scene.add(ambientLight);
+	
+    scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
+
+	// add directional light source
+	var directionalLight = new THREE.DirectionalLight(0x404040);
+	// directionalLight.matrix = THREE.Matrix4.getInverse(camera.matrixWorld);
+	// directionalLight.position.set(1, 1, 1).normalize();
+	directionalLight.position.set(1, 1, 1).normalize();
+	scene.add(directionalLight);
+
 }
 
 function onWindowResize() {
@@ -78,84 +118,45 @@ function animate() {
 var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 function render() {
 	var time = new Date().getTime() / 1000;
-	if (settings.isAnimatingCheckbox.checked) 
-		lastAnimation += time - lastTime;
-
-	if (settings.isRotatingCheckbox.checked) 
-		lastRotation += time - lastTime;
-
+	delta = time - lastTime;
 	lastTime = time;
-	
-	var scene = new THREE.Scene();
-	var triangle = new THREE.Object3D();
-	
-	if (lightGeometry === undefined)
-		return;
-	
-	var lights = lightGeometry.clone();	
 
-	lights.traverse( function ( child ) {
-		if ( child instanceof THREE.Mesh ) {
-			var faceIndices = [ 'a', 'b', 'c', 'd' ];
-			var color, f, p, n, vertexIndex;
-			geometry  = child.geometry;
-
-			for ( var i = 0; i < geometry.faces.length; i ++ ) {
-				f  = geometry.faces[ i ];
-				n = ( f instanceof THREE.Face3 ) ? 3 : 4;
-
-				for( var j = 0; j < n; j++ ) {
-					vertexIndex = f[ faceIndices[ j ] ];
-	
-					var h = ((lastAnimation * 5) % 100) / 100.0;
-					var color = new THREE.Color();
-					color = color.setHSL(h, 1.0, 0.5);
-					f.vertexColors[ j ] = color;
-				}
-			}
-			
-			geometry.colorsNeedUpdate = true;
-
-			child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
-		}
-
-	} );
-	triangle.add(lights);
-	
-	if (bodyGeometry !== undefined) {
-		var geometry = bodyGeometry.clone();
-		triangle.add(geometry);
+	if (settings.isRotatingCheckbox.checked && !isNaN(delta))
+	{
+		console.log(lastRotation);
+		triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.13 * delta));
 	}
-	
 
-	var mesh = new THREE.Mesh( 
-		new THREE.CircleGeometry(200, 36),
-		new THREE.MeshBasicMaterial( { color: 0x111111, shading: THREE.FlatShading } ) 
-	);
-	
-	mesh.applyMatrix(new THREE.Matrix4().identity().rotateX(-Math.PI / 2));
-	mesh.position.y = -0.6;
-	triangle.add(mesh);
-	
-	triangle.applyMatrix(new THREE.Matrix4().identity().rotateY(0.1 * lastRotation));
-		
 	var scale = 0.025;
 	triangle.scale.set(scale, scale, scale);
 	triangle.position.y = -2.5;
-	scene.add(triangle);
-
-	// add subtle ambient lighting
-	var ambientLight = new THREE.AmbientLight(0x222222);
-	scene.add(ambientLight);
 	
-    scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
+	if (settings.isAnimatingCheckbox.checked && lightGeometry !== undefined)
+	{
+		var faceIndices = [ 'a', 'b', 'c', 'd' ];
+		var f, h, n;
+		var color = new THREE.Color(0xffffff);
+		lightGeometry.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				geometry  = child.geometry;
 
-	// add directional light source
-	var directionalLight = new THREE.DirectionalLight(0x404040);
-//	directionalLight.matrix = THREE.Matrix4.getInverse(camera.matrixWorld);
-//	directionalLight.position.set(1, 1, 1).normalize();
-	directionalLight.position.set(1, 1, 1).normalize();
-	scene.add(directionalLight);
+				for ( var i = 0; i < geometry.faces.length; i ++ ) {
+					f  = geometry.faces[ i ];
+					n = ( f instanceof THREE.Face3 ) ? 3 : 4;
+
+					for( var j = 0; j < n; j++ ) {	
+						h = ((time * 5) % 100) / 100.0;
+						color.setHSL(h, 1.0, 0.5);
+						f.vertexColors[ j ] = color;
+					}
+				}
+				
+				geometry.colorsNeedUpdate = true;
+				child.material = new THREE.MeshBasicMaterial( { color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+			}
+		});
+	}
 
 	renderer.render( scene, camera );
 }
+
